@@ -1,9 +1,12 @@
-const UserModel = require("../models/usermodel");
+const Usermodel = require("../models/usermodel");
 
 const User_serv = {
-  async Find(Name) {
-    const User = await UserModel.findOne({ Name });
-    return User;
+  async FindMail(email) {
+    return await Usermodel.findOne({ Email: email });
+  },
+  async FindName(name) {
+    return await Usermodel.findOne({ Name: name });
   },
 };
+
 module.exports = User_serv;

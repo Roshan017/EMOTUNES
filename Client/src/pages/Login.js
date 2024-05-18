@@ -1,48 +1,56 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import * as Components from "../components/login-comp";
 
 function Login() {
-  const [values, setValues] = useState({
-    Name: "",
-    Email: "",
-    Password: "",
-  });
+  const history = useNavigate();
+  const [Email, setEmail] = useState("");
+  const [Name, setName] = useState("");
+  const [Password, setPassword] = useState("");
+  const [Confirm_Pwd, setCPassword] = useState("");
+  const [isSignIn, toggle] = useState(true);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setValues({
-      ...values,
-      [name.charAt(0).toUpperCase() + name.slice(1)]: value, // Capitalize the first letter
-    });
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    axios
-      .post("http://localhost:3000/Login", values)
-      .then((response) => {
-        // Handle successful response
-        console.log("Response:", response.data);
-        // Optionally, reset form values or perform any other actions
-        setValues({ Name: "", Email: "", Password: "" });
-      })
-      .catch((error) => {
-        // Handle error
-        if (error.response) {
-          // Server responded with a status code outside the range of 2xx
-          console.error("Server Error:", error.response.data);
-        } else if (error.request) {
-          // Request made but no response received
-          console.error("No Response:", error.request);
-        } else {
-          // Something else happened while setting up the request
-          console.error("Request Error:", error.message);
-        }
+  async function SignUP_submit(e) {
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:4000/Login", {
+        Name,
+        Email,
+        Password,
+        Confirm_Pwd,
       });
-  };
+      if (res.data === "Exist") {
+        alert("Email Already Exists");
+      } else if (res.data === "NO") {
+        alert("Passwords don't Match");
+      } else {
+        history("/Home", { state: { id: Name } });
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
-  const [signIn, toggle] = React.useState(true);
+  async function Login_submit(e) {
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:4000/Login/signup", {
+        Name,
+        Password,
+      });
+      if (res.data === "Null") {
+        alert("User Not Found");
+      } else if (res.data === "Match") {
+        history("/Home", { state: { id: Name } });
+      } else if (res.data === "Invalid") {
+        alert("Invalid Credentials");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   return (
     <div
       style={{
@@ -54,46 +62,76 @@ function Login() {
       }}
     >
       <Components.Container>
-        <Components.SignUpContainer signinIn={signIn}>
-          <Components.Form action="" method="POST" onSubmit={handleSubmit}>
+        <Components.SignUpContainer isSignIn={isSignIn}>
+          <Components.Form action="POST">
             <Components.Title>Create Account</Components.Title>
             <Components.Input
               type="text"
               placeholder="Name"
-              name="Name"
-              onChange={handleChange}
+              name="name"
+              onChange={(e) => {
+                setName(e.target.value);
+              }}
             />
             <Components.Input
               type="email"
               placeholder="Email"
-              name="Email"
-              onChange={handleChange}
+              name="email"
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
             />
             <Components.Input
               type="password"
               placeholder="Password"
-              name="Password"
-              onChange={handleChange}
+              name="password"
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
             />
-            <Components.Button>Sign Up</Components.Button>
+            <Components.Input
+              type="password"
+              placeholder="Confirm Password"
+              name="password"
+              onChange={(e) => {
+                setCPassword(e.target.value);
+              }}
+            />
+            <Components.Button onClick={SignUP_submit}>
+              Sign Up
+            </Components.Button>
           </Components.Form>
         </Components.SignUpContainer>
 
-        <Components.SignInContainer signinIn={signIn}>
-          <Components.Form>
-            <Components.Title>Sign in</Components.Title>
-            <Components.Input type="email" placeholder="Email" />
-            <Components.Input type="password" placeholder="Password" />
+        <Components.SignInContainer isSignIn={isSignIn}>
+          <Components.Form action="POST">
+            <Components.Title>Login</Components.Title>
+            <Components.Input
+              type="text"
+              placeholder="Name"
+              name="name"
+              onChange={(e) => {
+                setName(e.target.value);
+              }}
+            />
+            <Components.Input
+              type="password"
+              placeholder="Password"
+              name="password"
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+            />
             <Components.Anchor href="http://localhost:3000/Forgotpwd">
               Forgot your password?
             </Components.Anchor>
-            <Components.Button>Sign In</Components.Button>
+            <Components.Button onClick={Login_submit}>Login</Components.Button>
           </Components.Form>
         </Components.SignInContainer>
 
-        <Components.OverlayContainer signinIn={signIn}>
-          <Components.Overlay signinIn={signIn}>
-            <Components.LeftOverlayPanel signinIn={signIn}>
+        <Components.OverlayContainer isSignIn={isSignIn}>
+          <Components.Overlay isSignIn={isSignIn}>
+            <Components.LeftOverlayPanel isSignIn={isSignIn}>
               <Components.Title>Welcome Back!</Components.Title>
               <Components.Paragraph>
                 To keep connected with us please login with your personal info
@@ -103,7 +141,7 @@ function Login() {
               </Components.GhostButton>
             </Components.LeftOverlayPanel>
 
-            <Components.RightOverlayPanel signinIn={signIn}>
+            <Components.RightOverlayPanel isSignIn={isSignIn}>
               <Components.Title>Hello, Friend!</Components.Title>
               <Components.Paragraph>
                 Enter Your personal details and start journey with us
