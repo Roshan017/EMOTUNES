@@ -1,6 +1,7 @@
 import React from "react";
 import "../styles/front.css";
 import About from "../components/about";
+
 export default function Front() {
   return (
     <div className="container">
